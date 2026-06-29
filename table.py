@@ -30,25 +30,28 @@ class Table:
             number: מספר השולחן
             seats: כמות מקומות (ברירת מחדל: 4)
         """
-        raise NotImplementedError("Implement this method")
-    
+        self.__number = number
+        self.__seats = seats
+        self.__is_occupied = False
+        Table.total_tables += 1
+
     # --- Properties ---
     
     @property
     def number(self) -> int:
         """מחזיר את מספר השולחן"""
-        raise NotImplementedError("Implement this method")
-    
+        return self.__number
+
     @property
     def seats(self) -> int:
         """מחזיר את כמות המקומות"""
-        raise NotImplementedError("Implement this method")
-    
+        return self.__seats
+
     @property
     def is_occupied(self) -> bool:
         """מחזיר האם השולחן תפוס"""
-        raise NotImplementedError("Implement this method")
-    
+        return self.__is_occupied
+
     # --- Methods ---
     
     def occupy(self) -> bool:
@@ -62,12 +65,15 @@ class Table:
         Returns:
             True אם הצליח, False אם כבר היה תפוס
         """
-        raise NotImplementedError("Implement this method")
-    
+        if not self.__is_occupied:
+            self.__is_occupied = True
+            return True
+        return False
+
     def free(self):
         """סימון השולחן כפנוי"""
-        raise NotImplementedError("Implement this method")
-    
+        self.__is_occupied = False
+
     # --- Magic Methods ---
     
     def __str__(self) -> str:
@@ -77,4 +83,8 @@ class Table:
         Returns:
             "Table X (Y seats) - Free/Occupied"
         """
-        raise NotImplementedError("Implement this method")
+        status = "Free"
+        if self.__is_occupied:
+            status = "Occupied"
+
+        return f"Table {self.number} ({self.seats} seats) - {status}"

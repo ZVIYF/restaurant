@@ -1,6 +1,8 @@
 # order.py - מחלקת הזמנה
 
 from datetime import datetime
+from os import remove
+
 from menu_item import MenuItem
 from order_item import OrderItem
 from table import Table
@@ -40,20 +42,25 @@ class Order:
         Args:
             table: אובייקט השולחן
         """
-        raise NotImplementedError("Implement this method")
-    
+        Order._order_counter += 1
+        self.__order_id = Order._order_counter
+        self.__table = table
+        self.__items = []
+        self.__created_at = datetime.now()
+        self.__is_closed = False
+
     # --- Properties ---
     
     @property
     def order_id(self) -> int:
         """מחזיר את מזהה ההזמנה"""
-        raise NotImplementedError("Implement this method")
-    
+        return self.__order_id
+
     @property
     def table(self) -> Table:
         """מחזיר את אובייקט השולחן"""
-        raise NotImplementedError("Implement this method")
-    
+        return self.__table
+
     @property
     def items(self) -> list:
         """
@@ -62,18 +69,18 @@ class Order:
         דרישות:
         - להחזיר עותק (copy) ולא את הרשימה עצמה
         """
-        raise NotImplementedError("Implement this method")
-    
+        return self.__items.copy()
+
     @property
     def is_closed(self) -> bool:
         """מחזיר האם ההזמנה נסגרה"""
-        raise NotImplementedError("Implement this method")
-    
+        return self.__is_closed
+
     @property
     def created_at(self) -> datetime:
         """מחזיר את זמן יצירת ההזמנה"""
-        raise NotImplementedError("Implement this method")
-    
+        return self.__created_at
+
     # --- Methods ---
     
     def add_item(self, menu_item: MenuItem, quantity: int = 1, notes: str = "") -> OrderItem:
@@ -95,8 +102,17 @@ class Order:
         Returns:
             ה-OrderItem שנוסף/עודכן
         """
-        raise NotImplementedError("Implement this method")
-    
+        if self.__is_closed:
+            raise Exception("Cannot add items to closed order")
+        for item in self.__items:
+            if menu_item.name == item.name and item.order_item.notes == notes:
+                item.quantity += quantity
+                return item
+        new_order_item = OrderItem(menu_item, quantity, notes)
+        self.__items.append(new_order_item)
+        return new_order_item
+
+
     def remove_item(self, menu_item: MenuItem) -> bool:
         """
         הסרת פריט מההזמנה.
@@ -108,8 +124,14 @@ class Order:
         Returns:
             True אם נמצא והוסר, False אחרת
         """
-        raise NotImplementedError("Implement this method")
-    
+        if self.__is_closed:
+            raise Exception("Cannot remove items from closed order")
+        for i in range(len(self)):
+            if self.__items[i].name == menu_item.name:
+                self.__items.pop(i)
+                return True
+        return False
+
     def get_subtotal(self) -> float:
         """
         מחזיר סכום ביניים (לפני טיפ).
@@ -117,8 +139,11 @@ class Order:
         Returns:
             סכום כל ה-subtotal של הפריטים
         """
-        raise NotImplementedError("Implement this method")
-    
+        sub_sum = 0
+        for item in self.__items:
+            sub_sum += item.subtotal
+        return sub_sum
+
     def get_total(self, tip_percent: float = None) -> float:
         """
         מחזיר סכום כולל עם טיפ.
@@ -186,8 +211,8 @@ class Order:
     
     def __len__(self) -> int:
         """מחזיר כמות פריטים בהזמנה"""
-        raise NotImplementedError("Implement this method")
-    
+        return len(self.__items)
+
     def __str__(self) -> str:
         """
         ייצוג מחרוזת.
@@ -195,4 +220,7 @@ class Order:
         Returns:
             "Order #X (Table Y) - Z items - Open/Closed"
         """
-        raise NotImplementedError("Implement this method")
+        status = "Open"
+        if self.__is_closed:
+            status = "Closed"
+        return f"Order #{self.__order_id} (Table {self.__table.number}) - {len(self)} items - {status}"
