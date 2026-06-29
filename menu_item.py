@@ -93,7 +93,7 @@ class MenuItem:
         Returns:
             מחרוזת מפורמטת, לדוגמה: "$32.00"
         """
-        return f"{price:.2f}$"
+        return f"${price:.2f}"
 
     # --- Magic Methods ---
     
@@ -184,8 +184,9 @@ class Appetizer(MenuItem):
             True אם הצליח, False אחרת
         """
         if self.selected_bread is None:
-            if bread_type in Appetizer._bread_inventory:
-                if Appetizer._bread_inventory[bread_type] > 0:
+            if (bread_type in Appetizer._bread_inventory
+            and Appetizer._bread_inventory[bread_type] > 0):
+                    self.selected_bread = bread_type
                     Appetizer._bread_inventory[bread_type] -= 1
                     return True
         return False
@@ -282,7 +283,7 @@ class Appetizer(MenuItem):
     @classmethod
     def get_bread_inventory(cls) -> dict:
         """מחזיר עותק של מילון המלאי"""
-        return cls._bread_inventory
+        return cls._bread_inventory.copy()
 
     # --- Magic Methods ---
     
@@ -321,13 +322,14 @@ class MainCourse(MenuItem):
         - לקרוא ל-__init__ של מחלקת האב
         - לאתחל _selected_side ל-None
         """
-
+        super().__init__(name, price, description)
+        self.__selected_side = None
 
     @property
     def selected_side(self) -> str:
         """מחזיר את התוספת שנבחרה (או None)"""
-        raise NotImplementedError("Implement this method")
-    
+        return self.__selected_side()
+
     def select_side(self, side: str) -> bool:
         """
         בחירת תוספת.
@@ -337,17 +339,20 @@ class MainCourse(MenuItem):
         - אם כן: לעדכן _selected_side ולהחזיר True
         - אם לא: להחזיר False
         """
-        raise NotImplementedError("Implement this method")
-    
+        if side in MainCourse.get_side_options():
+            self.__selected_side = side
+            return True
+        return False
+
     def get_category(self) -> str:
         """מחזיר 'Main Courses'"""
-        raise NotImplementedError("Implement this method")
-    
+        return 'Main Courses'
+
     @classmethod
     def get_side_options(cls) -> list:
         """מחזיר עותק של רשימת התוספות"""
-        raise NotImplementedError("Implement this method")
-    
+        return MainCourse._side_options.copy()
+
     @classmethod
     def add_side_option(cls, side: str):
         """
@@ -356,13 +361,16 @@ class MainCourse(MenuItem):
         דרישות:
         - להוסיף רק אם לא קיימת כבר
         """
-        raise NotImplementedError("Implement this method")
-    
+        if side not in cls.get_side_options():
+            MainCourse._side_options.append(side)
+
+
     @classmethod
     def remove_side_option(cls, side: str):
         """הסרת תוספת מהרשימה (אם קיימת)"""
-        raise NotImplementedError("Implement this method")
-    
+        if side in cls.get_side_options():
+            MainCourse._side_options.remove(side)
+
     def __str__(self) -> str:
         """
         ייצוג מחרוזת כולל תוספת.
@@ -370,8 +378,9 @@ class MainCourse(MenuItem):
         Returns:
             "name - $price" או "name - $price (with side)"
         """
-        raise NotImplementedError("Implement this method")
-
+        if self.selected_side is None:
+            return f"{self.name} - {MenuItem.format_price(self.price)}"
+        return f"{self.name} - {MenuItem.format_price(self.price)} (with {self.selected_side})"
 
 class Dessert(MenuItem):
     """
@@ -389,17 +398,19 @@ class Dessert(MenuItem):
         - לקרוא ל-__init__ של מחלקת האב
         - לשמור את is_sugar_free ב-_is_sugar_free
         """
-        raise NotImplementedError("Implement this method")
-    
+        super().__init__(name, price, description)
+        self.__is_sugar_free = is_sugar_free
+
+
     @property
     def is_sugar_free(self) -> bool:
         """מחזיר האם הקינוח ללא סוכר"""
-        raise NotImplementedError("Implement this method")
-    
+        return self.__is_sugar_free
+
     def get_category(self) -> str:
         """מחזיר 'Desserts'"""
-        raise NotImplementedError("Implement this method")
-    
+        return "Desserts"
+
     def __str__(self) -> str:
         """
         ייצוג מחרוזת.
@@ -407,8 +418,9 @@ class Dessert(MenuItem):
         Returns:
             "name - $price" או "name - $price (sugar-free)"
         """
-        raise NotImplementedError("Implement this method")
-
+        if not self.is_sugar_free:
+            return f"{self.name} - {MenuItem.format_price(self.price)}"
+        return f"{self.name} - {MenuItem.format_price(self.price)} (sugar-free)"
 
 class Beverage(MenuItem):
     """
