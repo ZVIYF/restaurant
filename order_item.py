@@ -27,20 +27,22 @@ class OrderItem:
             quantity: כמות (ברירת מחדל: 1)
             notes: הערות (ברירת מחדל: מחרוזת ריקה)
         """
-        raise NotImplementedError("Implement this method")
-    
+        self.__menu_item = menu_item
+        self.quantity = quantity
+        self.__notes = notes
+
     # --- Properties ---
     
     @property
     def menu_item(self) -> MenuItem:
         """מחזיר את הפריט מהתפריט"""
-        raise NotImplementedError("Implement this method")
-    
+        return self.__menu_item
+
     @property
     def quantity(self) -> int:
         """מחזיר את הכמות"""
-        raise NotImplementedError("Implement this method")
-    
+        return self.__quantity
+
     @quantity.setter
     def quantity(self, value: int):
         """
@@ -49,18 +51,20 @@ class OrderItem:
         דרישות:
         - אם הכמות קטנה מ-1, להעלות ValueError עם הודעה "Quantity must be at least 1"
         """
-        raise NotImplementedError("Implement this method")
-    
+        if value < 1:
+            raise ValueError("Quantity must be at least 1")
+        self.__quantity = value
+
     @property
     def notes(self) -> str:
         """מחזיר את ההערות"""
-        raise NotImplementedError("Implement this method")
-    
+        return self.__notes
+
     @notes.setter
     def notes(self, value: str):
         """קובע את ההערות"""
-        raise NotImplementedError("Implement this method")
-    
+        self.__notes = value
+
     @property
     def subtotal(self) -> float:
         """
@@ -74,8 +78,11 @@ class OrderItem:
         Returns:
             מחיר × כמות
         """
-        raise NotImplementedError("Implement this method")
-    
+        try:
+            return self.menu_item.get_total_price * self.quantity
+        except:
+            return self.menu_item.price * self.quantity
+
     # --- Magic Methods ---
     
     def __str__(self) -> str:
@@ -85,4 +92,6 @@ class OrderItem:
         Returns:
             "quantity x name = $subtotal" או "quantity x name = $subtotal (notes)"
         """
-        raise NotImplementedError("Implement this method")
+        if self.notes:
+            return f"{self.quantity} x {self.name} = {self.subtotal} ({self.notes})"
+        return f"{self.quantity} x {self.name} = {self.subtotal}"

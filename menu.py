@@ -18,8 +18,8 @@ class Menu:
         דרישות:
         - לאתחל _items לרשימה ריקה
         """
-        raise NotImplementedError("Implement this method")
-    
+        self.__items = []
+
     # --- Properties ---
     
     @property
@@ -30,8 +30,8 @@ class Menu:
         דרישות:
         - להחזיר עותק (copy) ולא את הרשימה עצמה
         """
-        raise NotImplementedError("Implement this method")
-    
+        return self.__items.copy()
+
     # --- Methods ---
     
     def add_item(self, item: MenuItem) -> bool:
@@ -46,8 +46,11 @@ class Menu:
         Returns:
             True אם נוסף, False אם כבר קיים
         """
-        raise NotImplementedError("Implement this method")
-    
+        if item.name in self:
+            return False
+        self.__items.append(item)
+        return True
+
     def remove_item(self, name: str) -> bool:
         """
         הסרת פריט לפי שם.
@@ -55,17 +58,24 @@ class Menu:
         Returns:
             True אם נמצא והוסר, False אחרת
         """
-        raise NotImplementedError("Implement this method")
-    
-    def find_item(self, name: str) -> MenuItem:
+        for i in range(len(self)):
+            if self[i] == name:
+                self.__items.pop(i)
+                return True
+        return False
+
+    def find_item(self, name: str) -> MenuItem|None:
         """
         חיפוש פריט לפי שם.
         
         Returns:
             הפריט אם נמצא, None אחרת
         """
-        raise NotImplementedError("Implement this method")
-    
+        for item in self.items:
+            if item.name == name:
+                return item
+        return None
+
     def update_price(self, name: str, new_price: float) -> bool:
         """
         עדכון מחיר פריט.
@@ -76,8 +86,11 @@ class Menu:
         Returns:
             True אם נמצא ועודכן, False אחרת
         """
-        raise NotImplementedError("Implement this method")
-    
+        for item in self.items:
+            if item.name == name:
+                item.price = new_price # לבדוק אם צריך super
+        return False
+
     def get_by_category(self, category: str) -> list:
         """
         מחזיר את כל הפריטים בקטגוריה מסוימת.
@@ -85,8 +98,12 @@ class Menu:
         Returns:
             רשימת פריטים שה-get_category שלהם שווה לקטגוריה
         """
-        raise NotImplementedError("Implement this method")
-    
+        searched_category = []
+        for item in self:
+            if item.get_category == category:
+                searched_category.append(item)
+        return searched_category
+
     def get_all_categories(self) -> list:
         """
         מחזיר רשימת כל הקטגוריות בתפריט.
@@ -94,8 +111,11 @@ class Menu:
         Returns:
             רשימה ללא כפילויות
         """
-        raise NotImplementedError("Implement this method")
-    
+        categotries = set()
+        for item in self:
+            categotries.add(item.get_category)
+        return list(categotries)
+
     def get_items_in_price_range(self, min_price: float, max_price: float) -> list:
         """
         מחזיר פריטים בטווח מחירים.
@@ -103,8 +123,12 @@ class Menu:
         Returns:
             רשימת פריטים שהמחיר שלהם בין min_price ל-max_price (כולל)
         """
-        raise NotImplementedError("Implement this method")
-    
+        in_range = []
+        for item in self:
+            if min_price < item.price < max_price:
+                in_range.append(item)
+        return in_range
+
     # --- Class Methods ---
     
     @classmethod
@@ -127,29 +151,32 @@ class Menu:
             אובייקט Menu חדש
         """
         raise NotImplementedError("Implement this method")
-    
+
     # --- Magic Methods ---
     
     def __len__(self) -> int:
         """מחזיר כמות פריטים בתפריט"""
-        raise NotImplementedError("Implement this method")
-    
+        return len(self.items)
+
     def __contains__(self, name: str) -> bool:
         """
         בדיקה אם פריט קיים בתפריט לפי שם.
         
         שימוש: "Hummus" in menu
         """
-        raise NotImplementedError("Implement this method")
-    
+        for item in self:
+            if item.name == name:
+                return True
+        return False
+
     def __iter__(self):
         """
         אפשרות לעבור על הפריטים בלולאה.
         
         שימוש: for item in menu: ...
         """
-        raise NotImplementedError("Implement this method")
-    
+        return iter(self.items)
+
     def __getitem__(self, name: str) -> MenuItem:
         """
         גישה לפריט לפי שם.
@@ -159,4 +186,8 @@ class Menu:
         דרישות:
         - אם לא נמצא, להעלות KeyError עם הודעה "Item 'name' not found in menu"
         """
-        raise NotImplementedError("Implement this method")
+        for item in self:
+            if item.name == name:
+                return item
+        raise KeyError(f"Item '{name}' not found in menu")
+
