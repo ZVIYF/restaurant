@@ -364,7 +364,6 @@ class MainCourse(MenuItem):
         if side not in cls.get_side_options():
             MainCourse._side_options.append(side)
 
-
     @classmethod
     def remove_side_option(cls, side: str):
         """הסרת תוספת מהרשימה (אם קיימת)"""
@@ -446,13 +445,15 @@ class Beverage(MenuItem):
         - להשתמש ב-setter של size (לולידציה)
         - לשמור את is_cold ב-_is_cold
         """
-        raise NotImplementedError("Implement this method")
-    
+        super().__init__(name, price, description)
+        self.size = size
+        self.__is_cold = is_cold
+
     @property
     def size(self) -> str:
         """מחזיר את גודל המשקה"""
-        raise NotImplementedError("Implement this method")
-    
+        return self.__size
+
     @size.setter
     def size(self, value: str):
         """
@@ -461,17 +462,20 @@ class Beverage(MenuItem):
         דרישות:
         - אם הגודל לא ברשימת SIZES, להעלות ValueError עם הודעה "Size must be one of: ['S', 'M', 'L']"
         """
-        raise NotImplementedError("Implement this method")
-    
+        if value in Beverage.SIZES:
+            self.__size = value
+        else:
+            raise ValueError("Size must be one of: ['S', 'M', 'L']")
+
     @property
     def is_cold(self) -> bool:
         """מחזיר האם המשקה קר"""
-        raise NotImplementedError("Implement this method")
-    
+        return self.__is_cold
+
     def get_category(self) -> str:
         """מחזיר 'Beverages'"""
-        raise NotImplementedError("Implement this method")
-    
+        return "Beverages"
+
     @staticmethod
     def get_size_multiplier(size: str) -> float:
         """
@@ -480,8 +484,12 @@ class Beverage(MenuItem):
         Returns:
             S -> 0.8, M -> 1.0, L -> 1.3
         """
-        raise NotImplementedError("Implement this method")
-    
+        if size == "S":
+            return 0.8
+        if size == "L":
+            return 1.3
+        return 1.0
+
     def get_total_price(self) -> float:
         """
         מחזיר מחיר לפי גודל.
@@ -489,8 +497,8 @@ class Beverage(MenuItem):
         Returns:
             מחיר בסיס כפול מכפיל הגודל
         """
-        raise NotImplementedError("Implement this method")
-    
+        return self.price * Beverage.get_size_multiplier(self.size)
+
     def __str__(self) -> str:
         """
         ייצוג מחרוזת כולל גודל וטמפרטורה.
@@ -498,4 +506,4 @@ class Beverage(MenuItem):
         Returns:
             "name (size, cold/hot) - $price"
         """
-        raise NotImplementedError("Implement this method")
+        return f"{self.name} ({self.size}, {self.is_cold}) - {MenuItem.format_price(self.get_total_price())}"
