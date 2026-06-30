@@ -30,8 +30,8 @@ class OrderManagerCLI:
         Args:
             restaurant: אובייקט המסעדה
         """
-        pass
-    
+        self.__restaurant = restaurant
+
     def run(self):
         """
         לולאת תת-התפריט הראשית.
@@ -53,8 +53,9 @@ class OrderManagerCLI:
         - "*** Invalid choice ***" לבחירה לא חוקית
         - "Press Enter to continue..."
         """
-        pass
-    
+        while True:
+            pass
+
     def _display_menu(self):
         """
         הצגת תפריט ניהול הזמנות.
@@ -69,7 +70,14 @@ class OrderManagerCLI:
             4. Close Order (Bill)
             0. Back to Main Menu
         """
-        pass
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print("===== Order Management =====\n"
+            "1. Open New Order\n"
+            "2. Show Active Orders\n"
+            "3. Edit Existing Order\n"
+            "4. Close Order (Bill)\n"
+            "0. Back to Main Menu)"
+            )
     
     def _open_new_order(self):
         """
@@ -86,8 +94,22 @@ class OrderManagerCLI:
         - אם כן, לקרוא ל-_add_items_loop
         - לטפל בשגיאות (ValueError) ולהציג "*** Error: ... ***"
         """
-        pass
-    
+        print("===== Open New Order =====")
+        if len(self.__restaurant.get_free_tables()) == 0:
+            print("*** No Free Tables ***")
+            return
+        for t in self.__restaurant.get_free_tables():
+            print(t)
+        table_number = input("Table number:")
+        if not (isinstance(table_number, int) and table_number > 0):
+            raise ValueError("Error: Table number most be integer and positive!")
+        my_order = self.__restaurant.open_order(table_number)
+        print(f"*** Order #{my_order.order_id} opened for table {my_order.table.number} ***")
+        choose = input("Add items now? (y/n): ")
+        if choose == "y":
+            self._add_items_loop(my_order)
+
+
     def _show_active_orders(self):
         """
         הצגת כל ההזמנות הפעילות.
@@ -101,8 +123,9 @@ class OrderManagerCLI:
             - "Current total: ₪XX.XX"
         - לחכות ל-"Press Enter to go back..."
         """
-        pass
-    
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+
     def _manage_order(self):
         """
         עריכת הזמנה קיימת.

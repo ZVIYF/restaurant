@@ -113,6 +113,7 @@ class Restaurant:
         """
         for t in self.get_free_tables():
             if table_number == t.number:
+                t.occupy()
                 return Order(t)
         raise ValueError(f"Table #{table_number} does not exist or occupied")
 

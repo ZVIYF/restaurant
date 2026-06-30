@@ -212,6 +212,7 @@ class Order:
                 f"Total: {MenuItem.format_price(self.get_total(tip_percent))}\n"
                 f"========================================\n"
                 )
+
     def close(self):
         """
         סגירת ההזמנה.
