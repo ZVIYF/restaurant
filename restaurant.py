@@ -152,7 +152,7 @@ class Restaurant:
         """
         for i, o in enumerate(self.get_active_orders()):
             if o.order_id == order.order_id:
-                order_total = o.get_total(tip_percent)
+                order_total = o.get_subtotal()
                 o.close()
                 self.__closed_orders.append(self.__active_orders.pop(i))
                 self.__total_revenue += order_total
@@ -200,7 +200,7 @@ class Restaurant:
                 items_count[item.name] += item.quantity
         most_ordered = None
         if len(items_count) == 0:
-            return (None, 0)
+            return None, 0
         for key, value in items_count.items():
             if most_ordered is None:
                 most_ordered = key, value
@@ -215,7 +215,13 @@ class Restaurant:
         Returns:
             מילון {category: amount}
         """
-
+        category_revenue = {}
+        for o in self.get_orders_count():
+            for item in o.items:
+                if item.menu_item.category not in category_revenue:
+                    category_revenue[item.menu_item.category] = 0
+                category_revenue[item.menu_item.category] += item.subtotal()
+        return category_revenue
 
     # --- Magic Methods ---
     
