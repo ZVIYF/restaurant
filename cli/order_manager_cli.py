@@ -2,6 +2,9 @@
 
 import os
 import sys
+
+from table import Table
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from restaurant import Restaurant
@@ -124,7 +127,13 @@ class OrderManagerCLI:
         - לחכות ל-"Press Enter to go back..."
         """
         os.system('cls' if os.name == 'nt' else 'clear')
-
+        if len(self.__restaurant.get_active_orders()) == 0:
+            print("*** No Active Orders ***")
+        else:
+            for order in self.__restaurant.get_active_orders():
+                print(order)
+                print(f"- Current total: {MenuItem.format_price(order.get_subtotal())}")
+        input("Press Enter to go back...")
 
     def _manage_order(self):
         """
@@ -138,8 +147,23 @@ class OrderManagerCLI:
         - אם לא נמצאה, להציג "*** No active order for table X ***"
         - אם נמצאה, לקרוא ל-_edit_order_menu
         """
-        pass
-    
+        if len(self.__restaurant.get_active_orders()) == 0:
+            print("*** No Active Orders ***")
+            return
+        for i, o in self.__restaurant.get_active_orders():
+            print(f"{i + 1}. \t", end="")
+            print(o)
+        table_number = input("Table number to edit:")
+        if not (isinstance(table_number, int) and table_number > 0):
+            raise ValueError("Error: Table number most be integer and positive!")
+        my_order = self.__restaurant.get_order_by_table(table_number)
+        if my_order is None:
+            print(f"*** No active order for table {table_number} ***")
+        else:
+            self._edit_order_menu(my_order)
+
+
+
     def _edit_order_menu(self, order: Order):
         """
         תפריט עריכת הזמנה ספציפית.
@@ -158,12 +182,32 @@ class OrderManagerCLI:
             "3" -> _remove_item_from_order
             "4" -> _print_bill
             "0" -> יציאה
-        
+
         Args:
             order: ההזמנה לעריכה
         """
-        pass
-    
+        while True:
+            print("===== Edit Order #X (Table Y) =====\n"
+            "1. Show Order Items\n"
+            "2. Add Item\n"
+            "3. Remove Item\n"
+            "4. Show Current Bill\n"
+            "0. Back\n")
+            choice = input("Enter your choice")
+            if choice == "0":
+                return
+            if choice == "1":
+                self._show_order_items(order)
+            elif choice == "2":
+                self._add_item_to_order(order)
+            elif choice == "3":
+                self._remove_item_from_order(order)
+            elif choice == "4":
+                self._print_bill(order)
+            else:
+                print("Error: Invalid Choice")
+
+
     def _show_order_items(self, order: Order):
         """
         הצגת פריטים בהזמנה.
@@ -177,7 +221,14 @@ class OrderManagerCLI:
         Args:
             order: ההזמנה להצגה
         """
-        pass
+        print(f"Items in Order #{order.order_id}:")
+        if len(order) == 0:
+            print("Order is empty")
+        else:
+            for item in order.items:
+                print(item)
+        input("Press Enter to go back...")
+
     
     def _add_item_to_order(self, order: Order):
         """
@@ -186,7 +237,7 @@ class OrderManagerCLI:
         Args:
             order: ההזמנה להוספה אליה
         """
-        pass
+        self._add_items_loop(order)
     
     def _add_items_loop(self, order: Order):
         """
@@ -214,7 +265,10 @@ class OrderManagerCLI:
         Args:
             order: ההזמנה להוספה אליה
         """
-        pass
+        while True:
+            for category in self.__restaurant.menu.get_all_categories():
+                print(f" === {category} === ")
+            print(self.__restaurant.menu)
     
     def _remove_item_from_order(self, order: Order):
         """
