@@ -378,7 +378,7 @@ class MainCourse(MenuItem):
             "name - $price" או "name - $price (with side)"
         """
         if self.selected_side is None:
-            return f"{self.name} - {MenuItem.format_price(self.price)}"
+            return (f"{self.name} - {MenuItem.format_price(self.price)}")
         return f"{self.name} - {MenuItem.format_price(self.price)} (with {self.selected_side})"
 
 class Dessert(MenuItem):

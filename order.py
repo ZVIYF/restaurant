@@ -158,8 +158,10 @@ class Order:
         Returns:
             סכום כולל טיפ
         """
-        raise NotImplementedError("Implement this method")
-    
+        if tip_percent is None:
+            tip_percent = Order.DEFAULT_TIP_PERCENT
+        return self.get_subtotal() * (1 + (tip_percent / 100))
+
     def get_bill(self, tip_percent: float = None) -> str:
         """
         מחזיר חשבון מפורט כמחרוזת.
@@ -188,8 +190,28 @@ class Order:
         Returns:
             חשבון מפורמט
         """
-        raise NotImplementedError("Implement this method")
-    
+        if tip_percent is None:
+            tip_percent = Order.DEFAULT_TIP_PERCENT
+
+        bill_time = datetime.now().strftime('%H:%M:%S')
+
+        items_list = ""
+        for item in self.__items:
+            items_list += f"{item.order_item} \n"
+
+        return (f"========================================\n"
+                f"Bill - Order #{self.order_id}\n"
+                f"Table: {self.table.number}:\n"
+                f"Time: {bill_time}\n"
+                f"========================================\n"
+                f"{items_list}\n"
+                f"----------------------------------------\n"
+                f"Subtotal: {MenuItem.format_price(self.get_subtotal())}\n"
+                f"Tip ({tip_percent}%): {MenuItem.format_price(self.get_subtotal() * tip_percent)}\n"
+                f"========================================\n"
+                f"Total: {MenuItem.format_price(self.get_total(tip_percent))}\n"
+                f"========================================\n"
+                )
     def close(self):
         """
         סגירת ההזמנה.
@@ -198,15 +220,17 @@ class Order:
         - לסמן את ההזמנה כסגורה
         - לשחרר את השולחן (לקרוא ל-free)
         """
-        raise NotImplementedError("Implement this method")
-    
+        self.__is_closed = True
+        self.table.free()
+
+
     # --- Class Methods ---
     
     @classmethod
     def get_total_orders(cls) -> int:
         """מחזיר כמה הזמנות נוצרו בסה"כ"""
-        raise NotImplementedError("Implement this method")
-    
+        return cls._order_counter
+
     # --- Magic Methods ---
     
     def __len__(self) -> int:

@@ -4,6 +4,7 @@ from menu import Menu
 from table import Table
 from order import Order
 from menu_item import MenuItem
+from tests import total
 
 
 class Restaurant:
@@ -32,26 +33,31 @@ class Restaurant:
         Args:
             name: שם המסעדה
         """
-        raise NotImplementedError("Implement this method")
-    
+        self.__name = name
+        self.__menu = Menu()
+        self.__tables = []
+        self.__active_orders = []
+        self.__closed_orders = []
+        self.__total_revenue = 0.0
+
     # --- Properties ---
     
     @property
     def name(self) -> str:
         """מחזיר את שם המסעדה"""
-        raise NotImplementedError("Implement this method")
-    
+        return self.__name
+
     @property
     def menu(self) -> Menu:
         """מחזיר את אובייקט התפריט"""
-        raise NotImplementedError("Implement this method")
-    
+        return self.__menu
+
     # --- Table Management ---
     
     def add_table(self, table: Table):
         """הוספת שולחן למסעדה"""
-        raise NotImplementedError("Implement this method")
-    
+        self.__tables.append(Table)
+
     def get_table(self, number: int) -> Table:
         """
         שליפת שולחן לפי מספר.
@@ -59,20 +65,31 @@ class Restaurant:
         Returns:
             השולחן אם נמצא, None אחרת
         """
-        raise NotImplementedError("Implement this method")
-    
+        for t in self.__tables:
+            if t.number == number:
+                return t
+        return None
+
     def get_all_tables(self) -> list:
         """מחזיר עותק של רשימת כל השולחנות"""
-        raise NotImplementedError("Implement this method")
-    
+        return self.__tables.copy()
+
     def get_free_tables(self) -> list:
         """מחזיר רשימת שולחנות פנויים"""
-        raise NotImplementedError("Implement this method")
-    
+        free_tables = []
+        for t in self.__tables:
+            if not t.is_occupied():
+                free_tables.append(t)
+        return free_tables
+
     def get_occupied_tables(self) -> list:
         """מחזיר רשימת שולחנות תפוסים"""
-        raise NotImplementedError("Implement this method")
-    
+        occupied_tables = []
+        for t in self.__tables:
+            if t.is_occupied():
+                occupied_tables.append(t)
+        return occupied_tables
+
     # --- Order Management ---
     
     def open_order(self, table_number: int) -> Order:
@@ -94,12 +111,15 @@ class Restaurant:
         Raises:
             ValueError: אם השולחן לא קיים או תפוס
         """
-        raise NotImplementedError("Implement this method")
-    
+        for t in self.get_free_tables():
+            if table_number == t.number:
+                return Order(t)
+        raise ValueError(f"Table #{table_number} does not exist or occupied")
+
     def get_active_orders(self) -> list:
         """מחזיר עותק של רשימת הזמנות פעילות"""
-        raise NotImplementedError("Implement this method")
-    
+        return self.__active_orders.copy()
+
     def get_order_by_table(self, table_number: int) -> Order:
         """
         מחזיר הזמנה פעילה לפי מספר שולחן.
@@ -107,8 +127,11 @@ class Restaurant:
         Returns:
             ההזמנה אם נמצאה, None אחרת
         """
-        raise NotImplementedError("Implement this method")
-    
+        for o in self.__active_orders:
+            if o.table.number == table_number:
+                return o
+        return None
+
     def close_order(self, order: Order, tip_percent: float = None) -> float:
         """
         סגירת הזמנה וחישוב סכום לתשלום.
@@ -127,18 +150,27 @@ class Restaurant:
         Returns:
             הסכום הסופי לתשלום
         """
-        raise NotImplementedError("Implement this method")
-    
+        for i, o in enumerate(self.get_active_orders()):
+            if o.order_id == order.order_id:
+                order_total = o.get_total(tip_percent)
+                o.close()
+                self.__closed_orders.append(self.__active_orders.pop(i))
+                self.__total_revenue += order_total
+                return order_total
+        raise ValueError("Order not found in active orders")
+
+
+
     # --- Statistics (Bonus) ---
     
     def get_total_revenue(self) -> float:
         """מחזיר סה"כ הכנסות"""
-        raise NotImplementedError("Implement this method")
-    
+        return self.__total_revenue
+
     def get_orders_count(self) -> int:
         """מחזיר כמות הזמנות שנסגרו"""
-        raise NotImplementedError("Implement this method")
-    
+        return len(self.__closed_orders)
+
     def get_average_order_value(self) -> float:
         """
         מחזיר ממוצע סכום הזמנה.
@@ -146,8 +178,8 @@ class Restaurant:
         Returns:
             ממוצע, או 0.0 אם אין הזמנות
         """
-        raise NotImplementedError("Implement this method")
-    
+        return self.get_total_revenue() / self.get_orders_count()
+
     def get_most_popular_item(self) -> tuple:
         """
         מחזיר את הפריט שהוזמן הכי הרבה.
@@ -160,8 +192,22 @@ class Restaurant:
         Returns:
             (item_name, count) או (None, 0) אם אין נתונים
         """
-        raise NotImplementedError("Implement this method")
-    
+        items_count = {}
+        for o in self.get_orders_count():
+            for item in o.items:
+                if item.name not in items_count:
+                    items_count[item.name] = 0
+                items_count[item.name] += item.quantity
+        most_ordered = None
+        if len(items_count) == 0:
+            return (None, 0)
+        for key, value in items_count.items():
+            if most_ordered is None:
+                most_ordered = key, value
+            if value > most_ordered[1]:
+                most_ordered = (key, value)
+        return self.menu.__getitem__(most_ordered[0]), most_ordered[1]
+
     def get_revenue_by_category(self) -> dict:
         """
         מחזיר הכנסות מחולקות לפי קטגוריה.
@@ -169,8 +215,8 @@ class Restaurant:
         Returns:
             מילון {category: amount}
         """
-        raise NotImplementedError("Implement this method")
-    
+
+
     # --- Magic Methods ---
     
     def __str__(self) -> str:
@@ -180,4 +226,4 @@ class Restaurant:
         Returns:
             "Restaurant 'name' - X tables, Y menu items"
         """
-        raise NotImplementedError("Implement this method")
+        return f"Restaurant {self.name} - {len(self.__tables)} tables, {len(self.menu)} menu items"

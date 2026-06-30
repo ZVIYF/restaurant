@@ -34,6 +34,10 @@ class OrderItem:
     # --- Properties ---
     
     @property
+    def name(self):
+        return self.__menu_item.name
+
+    @property
     def menu_item(self) -> MenuItem:
         """מחזיר את הפריט מהתפריט"""
         return self.__menu_item

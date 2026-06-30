@@ -150,8 +150,8 @@ class Menu:
         Returns:
             אובייקט Menu חדש
         """
-        raise NotImplementedError("Implement this method")
-
+        pass
+    
     # --- Magic Methods ---
     
     def __len__(self) -> int:
