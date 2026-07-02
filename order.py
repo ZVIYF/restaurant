@@ -1,5 +1,4 @@
 # order.py - מחלקת הזמנה
-
 from datetime import datetime
 from os import remove
 
@@ -48,6 +47,7 @@ class Order:
         self.__items = []
         self.__created_at = datetime.now()
         self.__is_closed = False
+
 
     # --- Properties ---
     

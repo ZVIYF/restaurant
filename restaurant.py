@@ -4,7 +4,6 @@ from menu import Menu
 from table import Table
 from order import Order
 from menu_item import MenuItem
-from tests import total
 
 
 class Restaurant:
@@ -56,9 +55,9 @@ class Restaurant:
     
     def add_table(self, table: Table):
         """הוספת שולחן למסעדה"""
-        self.__tables.append(Table)
+        self.__tables.append(table)
 
-    def get_table(self, number: int) -> Table:
+    def get_table(self, number: int) -> Table|None:
         """
         שליפת שולחן לפי מספר.
         
@@ -78,7 +77,7 @@ class Restaurant:
         """מחזיר רשימת שולחנות פנויים"""
         free_tables = []
         for t in self.__tables:
-            if not t.is_occupied():
+            if not t.is_occupied:
                 free_tables.append(t)
         return free_tables
 
@@ -114,21 +113,23 @@ class Restaurant:
         for t in self.get_free_tables():
             if table_number == t.number:
                 t.occupy()
-                return Order(t)
+                new_order =  Order(t)
+                self.__active_orders.append(new_order)
+                return new_order
         raise ValueError(f"Table #{table_number} does not exist or occupied")
 
     def get_active_orders(self) -> list:
         """מחזיר עותק של רשימת הזמנות פעילות"""
         return self.__active_orders.copy()
 
-    def get_order_by_table(self, table_number: int) -> Order:
+    def get_order_by_table(self, table_number: int) -> Order|None:
         """
         מחזיר הזמנה פעילה לפי מספר שולחן.
         
         Returns:
             ההזמנה אם נמצאה, None אחרת
         """
-        for o in self.__active_orders:
+        for o in self.get_active_orders():
             if o.table.number == table_number:
                 return o
         return None
@@ -151,13 +152,13 @@ class Restaurant:
         Returns:
             הסכום הסופי לתשלום
         """
-        for i, o in enumerate(self.get_active_orders()):
-            if o.order_id == order.order_id:
-                order_total = o.get_subtotal()
-                o.close()
-                self.__closed_orders.append(self.__active_orders.pop(i))
-                self.__total_revenue += order_total
-                return order_total
+        if order in self.get_active_orders():
+            order_total = order.get_subtotal()
+            self.__active_orders.remove(order)
+            self.__total_revenue += order_total
+            order.close()
+            self.__closed_orders.append(order)
+            return order_total
         raise ValueError("Order not found in active orders")
 
 
